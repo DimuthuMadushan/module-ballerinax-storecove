@@ -24,42 +24,68 @@ final string apiKey = isLiveServer ? os:getEnv("STORECOVE_API_KEY") : "test_api_
 
 final Client storecove = check new ({auth: {token: apiKey}, httpVersion: http:HTTP_1_1}, serviceUrl);
 
+isolated function legalEntityPayload() returns LegalEntityCreate => {
+    partyName: "Acme Trading GmbH",
+    line1: "Hauptstrasse 12",
+    city: "Berlin",
+    zip: "10115",
+    country: "DE"
+};
+
+// The legal entity shared by the tests that need an existing one; created before and deleted after the suite.
+isolated int fixtureLegalEntityId = 0;
+
+isolated function legalEntityId() returns int {
+    lock {
+        return fixtureLegalEntityId;
+    }
+}
+
+@test:BeforeSuite
+isolated function createFixtures() returns error? {
+    LegalEntity created = check storecove->createLegalEntity(legalEntityPayload());
+    lock {
+        fixtureLegalEntityId = <int>created?.id;
+    }
+}
+
+@test:AfterSuite {alwaysRun: true}
+isolated function deleteFixtures() returns error? {
+    int id = legalEntityId();
+    if id != 0 {
+        check storecove->deleteLegalEntity(id);
+    }
+}
+
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testCreateLegalEntity() returns error? {
-    LegalEntity response = check storecove->createLegalEntity({
-        partyName: "Acme Trading GmbH",
-        line1: "Hauptstrasse 12",
-        city: "Berlin",
-        zip: "10115",
-        country: "DE"
-    });
+    LegalEntity response = check storecove->createLegalEntity(legalEntityPayload());
     test:assertTrue(response?.id is int);
     test:assertEquals(response?.partyName, "Acme Trading GmbH");
+    check storecove->deleteLegalEntity(<int>response?.id);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testGetLegalEntity() returns error? {
-    LegalEntity response = check storecove->getLegalEntity(1001);
-    test:assertEquals(response?.id, 1001);
+    int id = legalEntityId();
+    LegalEntity response = check storecove->getLegalEntity(id);
+    test:assertEquals(response?.id, id);
     test:assertTrue(response?.partyName is string);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testUpdateLegalEntity() returns error? {
-    LegalEntity response = check storecove->updateLegalEntity(1001, {partyName: "Acme Trading GmbH", city: "Munich"});
-    test:assertEquals(response?.id, 1001);
+    LegalEntity created = check storecove->createLegalEntity(legalEntityPayload());
+    int id = <int>created?.id;
+    LegalEntity response = check storecove->updateLegalEntity(id, {partyName: "Acme Trading GmbH", city: "Munich"});
+    test:assertEquals(response?.id, id);
     test:assertEquals(response?.city, "Munich");
+    check storecove->deleteLegalEntity(id);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testDeleteLegalEntity() returns error? {
-    LegalEntity created = check storecove->createLegalEntity({
-        partyName: "Acme Trading GmbH",
-        line1: "Hauptstrasse 12",
-        city: "Berlin",
-        zip: "10115",
-        country: "DE"
-    });
+    LegalEntity created = check storecove->createLegalEntity(legalEntityPayload());
     int createdId = <int>created?.id;
     error? response = storecove->deleteLegalEntity(createdId);
     test:assertTrue(response is ());
@@ -67,36 +93,50 @@ isolated function testDeleteLegalEntity() returns error? {
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testCreatePeppolIdentifier() returns error? {
-    PeppolIdentifier response = check storecove->createPeppolIdentifier(1001, {
+    PeppolIdentifier response = check storecove->createPeppolIdentifier(legalEntityId(), {
         superscheme: "iso6523-actorid-upis",
         scheme: "DE:VAT",
         identifier: "DE123456789"
     });
     test:assertEquals(response?.identifier, "DE123456789");
+    check storecove->deletePeppolIdentifier(legalEntityId(), <string>response?.superscheme, <string>response?.scheme,
+            <string>response?.identifier);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testUpdatePeppolIdentifier() returns error? {
-    PeppolIdentifier response = check storecove->updatePeppolIdentifier(1001, "iso6523-actorid-upis", "FR:CTC", "123456789", {
+    int id = legalEntityId();
+    PeppolIdentifier created = check storecove->createPeppolIdentifier(id, {
+        superscheme: "iso6523-actorid-upis",
+        scheme: "FR:CTC",
+        identifier: "123456789"
+    });
+    string superscheme = <string>created?.superscheme;
+    string scheme = <string>created?.scheme;
+    string identifier = <string>created?.identifier;
+    PeppolIdentifier response = check storecove->updatePeppolIdentifier(id, superscheme, scheme, identifier, {
         annuaire: {routingCodeLabel: "Accounts payable"}
     });
     test:assertEquals(response?.scheme, "FR:CTC");
+    check storecove->deletePeppolIdentifier(id, superscheme, scheme, identifier);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testDeletePeppolIdentifier() returns error? {
-    PeppolIdentifier created = check storecove->createPeppolIdentifier(1001, {
+    int id = legalEntityId();
+    PeppolIdentifier created = check storecove->createPeppolIdentifier(id, {
         superscheme: "iso6523-actorid-upis",
         scheme: "DE:VAT",
         identifier: "DE123456789"
     });
-    error? response = storecove->deletePeppolIdentifier(1001, <string>created?.superscheme, <string>created?.scheme, <string>created?.identifier);
+    error? response = storecove->deletePeppolIdentifier(id, <string>created?.superscheme, <string>created?.scheme, <string>created?.identifier);
     test:assertTrue(response is ());
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testCreateAdditionalTaxIdentifier() returns error? {
-    AdditionalTaxIdentifier response = check storecove->createAdditionalTaxIdentifier(1001, {
+    int id = legalEntityId();
+    AdditionalTaxIdentifier response = check storecove->createAdditionalTaxIdentifier(id, {
         country: "DE",
         superscheme: "iso6523-actorid-upis",
         scheme: "DE:VAT",
@@ -104,41 +144,65 @@ isolated function testCreateAdditionalTaxIdentifier() returns error? {
     });
     test:assertTrue(response?.id is int);
     test:assertEquals(response?.identifier, "DE123456789");
+    check storecove->deleteAdditionalTaxIdentifier(id, <int>response?.id);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testGetAdditionalTaxIdentifier() returns error? {
-    AdditionalTaxIdentifier response = check storecove->getAdditionalTaxIdentifier(1001, 2001);
-    test:assertEquals(response?.id, 2001);
-}
-
-@test:Config {groups: ["live_tests", "mock_tests"]}
-isolated function testUpdateAdditionalTaxIdentifier() returns error? {
-    AdditionalTaxIdentifier response = check storecove->updateAdditionalTaxIdentifier(1001, 2001, {identifier: "DE987654321"});
-    test:assertEquals(response?.identifier, "DE987654321");
-}
-
-@test:Config {groups: ["live_tests", "mock_tests"]}
-isolated function testDeleteAdditionalTaxIdentifier() returns error? {
-    AdditionalTaxIdentifier created = check storecove->createAdditionalTaxIdentifier(1001, {
+    int id = legalEntityId();
+    AdditionalTaxIdentifier created = check storecove->createAdditionalTaxIdentifier(id, {
         country: "DE",
         superscheme: "iso6523-actorid-upis",
         scheme: "DE:VAT",
         identifier: "DE123456789"
     });
-    error? response = storecove->deleteAdditionalTaxIdentifier(1001, <int>created?.id);
+    int taxIdentifierId = <int>created?.id;
+    AdditionalTaxIdentifier response = check storecove->getAdditionalTaxIdentifier(id, taxIdentifierId);
+    test:assertEquals(response?.id, taxIdentifierId);
+    check storecove->deleteAdditionalTaxIdentifier(id, taxIdentifierId);
+}
+
+@test:Config {groups: ["live_tests", "mock_tests"]}
+isolated function testUpdateAdditionalTaxIdentifier() returns error? {
+    int id = legalEntityId();
+    AdditionalTaxIdentifier created = check storecove->createAdditionalTaxIdentifier(id, {
+        country: "DE",
+        superscheme: "iso6523-actorid-upis",
+        scheme: "DE:VAT",
+        identifier: "DE123456789"
+    });
+    int taxIdentifierId = <int>created?.id;
+    AdditionalTaxIdentifier response = check storecove->updateAdditionalTaxIdentifier(id, taxIdentifierId, {identifier: "DE987654321"});
+    test:assertEquals(response?.identifier, "DE987654321");
+    check storecove->deleteAdditionalTaxIdentifier(id, taxIdentifierId);
+}
+
+@test:Config {groups: ["live_tests", "mock_tests"]}
+isolated function testDeleteAdditionalTaxIdentifier() returns error? {
+    int id = legalEntityId();
+    AdditionalTaxIdentifier created = check storecove->createAdditionalTaxIdentifier(id, {
+        country: "DE",
+        superscheme: "iso6523-actorid-upis",
+        scheme: "DE:VAT",
+        identifier: "DE123456789"
+    });
+    error? response = storecove->deleteAdditionalTaxIdentifier(id, <int>created?.id);
     test:assertTrue(response is ());
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testCreateInvoiceSubmission() returns error? {
-    InvoiceSubmissionResult response = check storecove->createInvoiceSubmission({legalEntityId: 1001, document: "PEludm9pY2UvPg=="});
+    InvoiceSubmissionResult response = check storecove->createInvoiceSubmission({legalEntityId: legalEntityId(), document: "PEludm9pY2UvPg=="});
     test:assertTrue(response?.guid is string);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testGetInvoiceSubmissionEvidence() returns error? {
-    InvoiceSubmissionEvidence response = check storecove->getInvoiceSubmissionEvidence("0c9d8e7f-6a5b-4c3d-9e2f-1a0b9c8d7e6f");
+    InvoiceSubmissionResult submission = check storecove->createInvoiceSubmission({
+        legalEntityId: legalEntityId(),
+        document: "PEludm9pY2UvPg=="
+    });
+    InvoiceSubmissionEvidence response = check storecove->getInvoiceSubmissionEvidence(<string>submission?.guid);
     test:assertTrue(response?.status is string);
     test:assertTrue((response?.actions ?: []).length() > 0);
 }
@@ -146,7 +210,7 @@ isolated function testGetInvoiceSubmissionEvidence() returns error? {
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testCreateDocumentSubmission() returns error? {
     DocumentSubmissionResult response = check storecove->createDocumentSubmission({
-        legalEntityId: 1001,
+        legalEntityId: legalEntityId(),
         document: {documentType: "invoice"}
     });
     test:assertTrue(response?.guid is string);
@@ -154,7 +218,11 @@ isolated function testCreateDocumentSubmission() returns error? {
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testGetDocumentSubmissionEvidence() returns error? {
-    DocumentSubmissionEvidence response = check storecove->getDocumentSubmissionEvidence("5f8c1c0e-3b0a-4a53-9d0e-2d6f1b7a9c11", "sending");
+    DocumentSubmissionResult submission = check storecove->createDocumentSubmission({
+        legalEntityId: legalEntityId(),
+        document: {documentType: "invoice"}
+    });
+    DocumentSubmissionEvidence response = check storecove->getDocumentSubmissionEvidence(<string>submission?.guid, "sending");
     test:assertTrue(response?.guid is string);
     test:assertTrue((response?.documents ?: []).length() > 0);
 }
@@ -206,7 +274,7 @@ isolated function testGetPurchaseInvoicePackaged() returns error? {
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testCreateReceivedDocument() returns error? {
-    ReceivedDocument response = check storecove->createReceivedDocument(1001, {
+    ReceivedDocument response = check storecove->createReceivedDocument(legalEntityId(), {
         document: "PEludm9pY2UvPg==",
         parseStrategy: "rfc822"
     });
@@ -215,8 +283,13 @@ isolated function testCreateReceivedDocument() returns error? {
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testGetReceivedDocument() returns error? {
-    Transportable response = check storecove->getReceivedDocument("9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d", "original");
-    test:assertEquals(response?.guid, "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d");
+    ReceivedDocument received = check storecove->createReceivedDocument(legalEntityId(), {
+        document: "PEludm9pY2UvPg==",
+        parseStrategy: "rfc822"
+    });
+    string guid = <string>received?.guid;
+    Transportable response = check storecove->getReceivedDocument(guid, "original");
+    test:assertTrue(response?.guid is string);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
@@ -227,6 +300,11 @@ isolated function testGetWebhookInstance() returns error? {
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 isolated function testWebhookInstanceDeletion() returns error? {
-    error? response = storecove->deleteWebhookInstance("3d2c1b0a-9f8e-4d7c-8b6a-5f4e3d2c1b0a");
+    // Webhook instances can't be created through the API; delete the next queued one, if any.
+    WebhookInstance? queued = check storecove->getWebhookInstance();
+    if queued is () {
+        return;
+    }
+    error? response = storecove->deleteWebhookInstance(<string>queued?.guid);
     test:assertTrue(response is ());
 }
