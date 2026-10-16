@@ -89,7 +89,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The additional tax identifier of the legal entity",
                         "schema": {
                             "$ref": "#/definitions/AdditionalTaxIdentifier"
                         }
@@ -141,7 +141,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The additional tax identifier of the legal entity",
                         "schema": {
                             "$ref": "#/definitions/AdditionalTaxIdentifier"
                         }
@@ -230,7 +230,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The additional tax identifier of the legal entity",
                         "schema": {
                             "$ref": "#/definitions/AdditionalTaxIdentifier"
                         }
@@ -296,7 +296,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The administration of the legal entity",
                         "schema": {
                             "$ref": "#/definitions/Administration"
                         }
@@ -348,7 +348,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The administration of the legal entity",
                         "schema": {
                             "$ref": "#/definitions/Administration"
                         }
@@ -437,7 +437,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The administration of the legal entity",
                         "schema": {
                             "$ref": "#/definitions/Administration"
                         }
@@ -481,7 +481,7 @@
                 ]
             }
         },
-        "/api/v2/legal_entities/{legal_entity_id}/c5_activation/activate": {
+        "/legal_entities/{legal_entity_id}/c5_activation/activate": {
             "post": {
                 "responses": {
                     "401": {
@@ -503,7 +503,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The result of the C5 activation request",
                         "schema": {
                             "$ref": "#/definitions/C5ActivationResponse"
                         }
@@ -542,7 +542,7 @@
                 ]
             }
         },
-        "/api/v2/legal_entities/{legal_entity_id}/c5_deactivation/deactivate": {
+        "/legal_entities/{legal_entity_id}/c5_deactivation/deactivate": {
             "post": {
                 "responses": {
                     "401": {
@@ -564,7 +564,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The result of the C5 deactivation request",
                         "schema": {
                             "$ref": "#/definitions/C5DeactivationResponse"
                         }
@@ -603,7 +603,7 @@
                 ]
             }
         },
-        "/api/v2/legal_entities/{legal_entity_id}/c5/iras/email/activate": {
+        "/legal_entities/{legal_entity_id}/c5/iras/email/activate": {
             "post": {
                 "responses": {
                     "401": {
@@ -658,7 +658,7 @@
                 ]
             }
         },
-        "/api/v2/legal_entities/{legal_entity_id}/c5/iras/email/deactivate": {
+        "/legal_entities/{legal_entity_id}/c5/iras/email/deactivate": {
             "post": {
                 "responses": {
                     "401": {
@@ -713,8 +713,9 @@
                 ]
             }
         },
-        "/api/v2/legal_entities/{legal_entity_id}/c5/iras/email/cancel": {
+        "/legal_entities/{legal_entity_id}/c5/iras/email/cancel": {
             "put": {
+                "operationId": "cancel_c5_email",
                 "summary": "Cancel a C5 email activation or deactivation",
                 "description": "Cancel an initiated C5 email activation or deactivation. This operation is available only on the global API (https://api.storecove.com/api/v2/), not on https://api.fr.storecove.com/api/v2/.",
                 "tags": [
@@ -751,7 +752,7 @@
                 ]
             }
         },
-        "/api/v2/legal_entities/{legal_entity_id}/c5/iras/redirect/activate": {
+        "/legal_entities/{legal_entity_id}/c5/iras/redirect/activate": {
             "post": {
                 "responses": {
                     "401": {
@@ -809,7 +810,7 @@
                 ]
             }
         },
-        "/api/v2/legal_entities/{legal_entity_id}/c5/iras/redirect/deactivate": {
+        "/legal_entities/{legal_entity_id}/c5/iras/redirect/deactivate": {
             "post": {
                 "responses": {
                     "401": {
@@ -867,8 +868,9 @@
                 ]
             }
         },
-        "/api/v2/legal_entities/{legal_entity_id}/c5/iras/redirect/cancel": {
+        "/legal_entities/{legal_entity_id}/c5/iras/redirect/cancel": {
             "put": {
+                "operationId": "cancel_c5_redirect",
                 "summary": "Cancel a C5 redirect activation or deactivation",
                 "description": "Cancel an initiated C5 redirect activation or deactivation. This operation is available only on the global API (https://api.storecove.com/api/v2/), not on https://api.fr.storecove.com/api/v2/.",
                 "tags": [
@@ -932,7 +934,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "The discovered network participant",
                         "schema": {
                             "$ref": "#/definitions/DiscoveredParticipant"
                         }
@@ -982,7 +984,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "The discovered network participant",
                         "schema": {
                             "$ref": "#/definitions/DiscoveredParticipant"
                         }
@@ -1018,7 +1020,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "The identifiers used in each country",
                         "schema": {
                             "$ref": "#/definitions/CountrySpecifications"
                         }
@@ -1045,7 +1047,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The evidence of the invoice submission",
                         "schema": {
                             "$ref": "#/definitions/InvoiceSubmissionEvidence"
                         }
@@ -1094,7 +1096,7 @@
                         }
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The result of the invoice submission",
                         "schema": {
                             "$ref": "#/definitions/InvoiceSubmissionResult"
                         }
@@ -1144,7 +1146,7 @@
                         }
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The result of the document submission",
                         "schema": {
                             "$ref": "#/definitions/DocumentSubmissionResult"
                         }
@@ -1185,7 +1187,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The evidence of the document submission",
                         "schema": {
                             "$ref": "#/definitions/DocumentSubmissionEvidence"
                         }
@@ -1243,7 +1245,7 @@
                         }
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The result of the invoice recipient preflight check",
                         "schema": {
                             "$ref": "#/definitions/PreflightInvoiceRecipientResult"
                         }
@@ -1293,7 +1295,7 @@
                         }
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The legal entity",
                         "schema": {
                             "$ref": "#/definitions/LegalEntity"
                         }
@@ -1337,7 +1339,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The legal entity",
                         "schema": {
                             "$ref": "#/definitions/LegalEntity"
                         }
@@ -1419,7 +1421,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The legal entity",
                         "schema": {
                             "$ref": "#/definitions/LegalEntity"
                         }
@@ -1468,7 +1470,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The purchase invoice data",
                         "schema": {
                             "$ref": "#/definitions/PurchaseInvoice"
                         }
@@ -1525,7 +1527,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The purchase invoice with a Base64-encoded UBL document",
                         "schema": {
                             "$ref": "#/definitions/PurchaseInvoiceUbl"
                         }
@@ -1595,7 +1597,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The purchase invoice with a Base64-encoded UBL document",
                         "schema": {
                             "$ref": "#/definitions/PurchaseInvoiceUbl"
                         }
@@ -1673,7 +1675,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The Peppol identifier of the legal entity",
                         "schema": {
                             "$ref": "#/definitions/PeppolIdentifier"
                         }
@@ -1734,7 +1736,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The Peppol identifier of the legal entity",
                         "schema": {
                             "$ref": "#/definitions/PeppolIdentifier"
                         }
@@ -1872,7 +1874,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The received document",
                         "schema": {
                             "$ref": "#/definitions/ReceivedDocument"
                         }
@@ -1924,7 +1926,7 @@
                         "description": "Bad Request"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The received document in the requested format",
                         "schema": {
                             "$ref": "#/definitions/Transportable"
                         }
@@ -1985,7 +1987,7 @@
                         "description": "Not Found"
                     },
                     "200": {
-                        "description": "Success",
+                        "description": "The webhook instance",
                         "schema": {
                             "$ref": "#/definitions/WebhookInstance"
                         }
@@ -12632,7 +12634,9 @@
                     "title": "Peppol Identifiers - DEPRECATED",
                     "description": "DEPRECATED - Use the identifiers array.",
                     "type": "array",
-                    "$ref": "#/definitions/PeppolIdentifier"
+                    "items": {
+                        "$ref": "#/definitions/PeppolIdentifier"
+                    }
                 },
                 "party_name": {
                     "title": "Party Name",

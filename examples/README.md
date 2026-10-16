@@ -2,13 +2,13 @@
 
 The `ballerinax/storecove` connector provides practical examples illustrating usage in various scenarios.
 
-[//]: # (TODO: Add examples)
-1. 
-2. 
+1. [Legal entity onboarding](legal_entity_onboarding/legal_entity_onboarding.md) - Create a legal entity, register its Peppol and additional tax identifiers, and read it back.
+2. [Peppol recipient discovery](peppol_recipient_discovery/peppol_recipient_discovery.md) - Check whether a recipient exists on the Peppol network and which document types it can receive.
 
 ## Prerequisites
 
-[//]: # (TODO: Add prerequisites)
+- A Storecove API key, supplied to each example through the `apiKey` configurable in its `Config.toml`.
+- Ballerina Swan Lake 2201.12.0 or later.
 
 ## Running an example
 
